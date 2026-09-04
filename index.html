@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Умный Купидон</title>
-    <script src="https://telegram.org"></script>
     <style>
         body { font-family: sans-serif; background-color: #fff0f5; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
-        .container { background-color: #ffffff; border-radius: 24px; padding: 24px; width: 100%; max-width: 400px; box-shadow: 0 8px 24px rgba(221, 50, 100, 0.1); border: 1px solid #fcddec; }
-        .partner-block { background-color: #fff9fc; border: 1px solid #fce7f3; border-radius: 16px; padding: 16px; margin-bottom: 20px; }
+        .container { background-color: #ffffff; border-radius: 24px; padding: 24px; width: 100%; max-width: 400px; box-shadow: 0 8px 24px rgba(221, 50, 100, 0.1); border: 1px solid #fcddec; text-align: center; }
+        .partner-block { background-color: #fff9fc; border: 1px solid #fce7f3; border-radius: 16px; padding: 16px; margin-bottom: 20px; text-align: left; }
         .partner-title { font-size: 13px; font-weight: 800; color: #d1216d; margin-bottom: 12px; letter-spacing: 1px; text-transform: uppercase; }
         .input-group { margin-bottom: 12px; }
         input, select { width: 100%; padding: 14px; border: 1px solid #ebd2df; border-radius: 12px; font-size: 16px; color: #333; background-color: #fff; box-sizing: border-box; }
-        .btn-calculate { background: linear-gradient(135deg, #e62e7a 0%, #bd1555 100%); color: white; border: none; border-radius: 50px; padding: 16px; font-size: 16px; font-weight: bold; width: 100%; cursor: pointer; box-shadow: 0 6px 16px rgba(230, 46, 122, 0.3); display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .btn-calculate { background: linear-gradient(135deg, #e62e7a 0%, #bd1555 100%); color: white; border: none; border-radius: 50px; padding: 16px; font-size: 16px; font-weight: bold; width: 100%; cursor: pointer; box-shadow: 0 6px 16px rgba(230, 46, 122, 0.3); display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 10px; }
+        .result-box { display: none; margin-top: 20px; padding: 16px; background-color: #fff5f8; border: 1px dashed #e62e7a; border-radius: 16px; color: #333; font-size: 16px; line-height: 1.6; text-align: left; font-weight: 500; }
     </style>
 </head>
 <body>
@@ -42,87 +42,66 @@
         </div>
     </div>
 
-    <button class="btn-calculate" id="calculateBtn" onclick="startCalculation()">
+    <button class="btn-calculate" onclick="makeCalculation()">
         ❤️ Рассчитать совместимость
     </button>
+
+    <div class="result-box" id="resultBox"></div>
 </div>
 
 <script>
-const database = {
+const predictions = {
     love: [
-        "В ваших отношениях горит яркое пламя страсти. Ваше притяжение магнетическое.",
-        "Ваша ментальная связь видна сразу — вы отлично понимаете друг друга по одному взгляду.",
-        "Взаимное доверие и нежность станут прочным фундаментом для ваших глубоких чувств.",
-        "Ваш союз наполнен романтикой и вдохновением. Вы раскрываете творческий потенциал друг друга.",
-        "Между вами царит редкое эмоциональное созвучие. Вы чувствуете настроение партнера."
+        "💘 Любовь: В ваших отношениях горит яркое пламя страсти. Ваше притяжение магнетическое.",
+        "💘 Любовь: Ваша ментальная связь видна сразу — вы отлично понимаете друг друга по одному взгляду.",
+        "💘 Любовь: Взаимное доверие и нежность станут прочным фундаментом для ваших глубоких чувств.",
+        "💘 Любовь: Ваш союз наполнен романтикой и вдохновением. Вы раскрываете потенциал друг друга.",
+        "💘 Любовь: Между вами царит редкое эмоциональное созвучие. Вы чувствуете настроение партнера."
     ],
     life: [
-        "В быту вы легко найдете компромиссы, разделяя домашние обязанности поровну.",
-        "Мелкие бытовые разногласия лишь укрепят ваш союз, так как вы умеете слушать партнера.",
-        "Ваш общий дом станет уютным пространством, полным гармонии, тепла и комфорта.",
-        "Вы умеете мотивировать друг друга на финансовые успехи. Быт станет трамплином.",
-        "Ваш семейный уклад будет динамичным. Вы любите принимать гостей и устраивать праздники."
-    ],
-    numTexts: [
-        "Ваше open число указывает на союз духовных наставников. Вы развиваете лучшие качества.",
-        "Число вашего союза символизирует стабильность и материальный успех. Отличный фундамент.",
-        "Ваш код говорит о ярком, эмоциональном приключении. Скучно точно никогда не будет!",
-        "Ваша нумерологическая связь сулит глубокую мудрость. Вы учитесь терпению в этом союзе.",
-        "Ваши вибрации идеальны для создания крепких семейных традиций и продолжения рода."
+        "🏡 Быт: В быту вы легко найдете компромиссы, разделяя домашние обязанности поровну.",
+        "🏡 Быт: Мелкие бытовые разногласия лишь укрепят ваш союз, так как вы умеете слушать партнера.",
+        "🏡 Быт: Ваш общий дом станет уютным пространством, полным гармонии, тепла и комфорта.",
+        "🏡 Быт: Вы умеете мотивировать друг друга на финансовые успехи. Быт станет трамплином.",
+        "🏡 Быт: Ваш семейный уклад будет динамичным. Вы любите устраивать праздники вместе."
     ],
     future: [
-        "Впереди вас ждет множество совместных путешествий, переездов и больших открытий.",
-        "Вашие общие кармические цели помогут вам построить стабильное и очень надежное будущее.",
-        "Вместе вы сможете преодолеть любые жизненные преграды, становясь сильнее после кризисов.",
-        "Ваш союз имеет все шансы стать примером идеальной семьи для будущих поколений.",
-        "Будущее готовит вам финансовое процветание через общие проекты или семейный бизнес."
+        "✨ Будущее: Впереди вас ждет множество совместных путешествий и больших открытий.",
+        "✨ Будущее: Ваши общие кармические цели помогут вам построить стабильное будущее.",
+        "✨ Будущее: Вместе вы сможете преодолеть любые жизненные преграды, становясь только ближе.",
+        "✨ Будущее: Ваш союз имеет все шансы стать примером идеальной семьи для близких.",
+        "✨ Будущее: Будущее готовит вам процветание через общие проекты или семейное дело."
     ]
 };
 
-const tg = window.Telegram.WebApp;
-tg.ready();
-tg.expand();
+function makeCalculation() {
+    const n1 = document.getElementById('name1').value.trim();
+    const n2 = document.getElementById('name2').value.trim();
 
-function startCalculation() {
-    const name1 = document.getElementById('name1').value.trim();
-    const name2 = document.getElementById('name2').value.trim();
-
-    if (!name1 || !name2) {
-        tg.showAlert('Пожалуйста, введите имена обоих партнеров! ❤️');
+    if (!n1 || !n2) {
+        alert('Пожалуйста, введите имена обоих партнеров! ❤️');
         return;
     }
 
-    // Алгоритм генерации индекса на основе букв имен, чтобы результат зависел от пары
-    const combinedString = name1.toLowerCase() + name2.toLowerCase();
-    let charSum = 0;
-    for (let i = 0; i < combinedString.length; i++) {
-        charSum += combinedString.charCodeAt(i);
+    // Железный расчет индекса по буквам имён, чтобы ответы были разными для разных пар
+    const combined = (n1 + n2).toLowerCase();
+    let sum = 0;
+    for (let i = 0; i < combined.length; i++) {
+        sum += combined.charCodeAt(i);
     }
-    const finalIndex = charSum % 5;
+    const idx = sum % 5;
 
-    const loveResult = database.love[finalIndex];
-    const lifeResult = database.life[(finalIndex + 1) % 5];
-    const numResult = database.numTexts[(finalIndex + 2) % 5];
-    const futureResult = database.future[(finalIndex + 3) % 5];
+    const text1 = predictions.love[idx];
+    const text2 = predictions.life[(idx + 1) % 5];
+    const text3 = predictions.future[(idx + 2) % 5];
 
-    const fullReport = `${loveResult}\n\n${lifeResult}\n\n${numResult}\n\n${futureResult}`;
-
-    const invoiceData = {
-        title: `Совместимость: ${name1} + ${name2}`,
-        description: "Узнай подробный разбор ваших отношений прямо сейчас! 💘",
-        payload: `cupid_${Date.now()}`,
-        currency: "XTR",
-        prices: [{ label: "Получить отчет", amount: 5 }],
-        textReport: fullReport
-    };
-
-    tg.sendData(JSON.stringify({
-        action: "create_invoice",
-        data: invoiceData
-    }));
+    // Выводим результат СРАЗУ на экран под кнопкой
+    const box = document.getElementById('resultBox');
+    box.innerHTML = `${text1}<br><br>${text2}<br><br>${text3}`;
+    box.style.display = 'block';
     
-    tg.showAlert('Купидон создает ваш личный счет! Перейдите в чат с ботом, чтобы оплатить его Звёздами. ✨');
-    tg.close();
+    // Плавно прокручиваем экран к ответу
+    box.scrollIntoView({ behavior: 'smooth' });
 }
 </script>
 
