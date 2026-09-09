@@ -1,10 +1,12 @@
 meta:
   environment: node
   toolchain:
-    name: node
-    version: 18
+    name: npm
+    version: 20
 build:
-  input: .
-  command: npm install
+  requirements:
+    - package.json
+  artifacts:
+    - .
 run:
-  command: node server.js
+  script: node server.js
