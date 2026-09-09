@@ -1,0 +1,58 @@
+const express = require('express');
+const cors = require('cors');
+const app = express();
+
+app.use(express.json());
+app.use(cors());
+
+const BOT_TOKEN = process.env.BOT_TOKEN;
+app.use(express.static(__dirname));
+
+app.post('/api/create-invoice', async (req, res) => {
+    try {
+        const { name1, name2 } = req.body;
+        if (!name1 || !name2) {
+            return res.status(400).json({ error: 'Заполните поля' });
+        }
+        
+        const url = `https://api.telegram.org/bot${BOT_TOKEN}/createInvoiceLink`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                title: '💘 Умный Купидон',
+                description: `Разбор для ${name1} и ${name2}`,
+                payload: JSON.stringify({ name1, name2 }),
+                provider_token: '',
+                currency: 'XTR',
+                prices: [{ label: 'Расчет 270', amount: 10 }]
+            })
+        });
+        
+        const data = await response.json();
+        if (data.ok) {
+            res.json({ invoiceLink: data.result });
+        } else {
+            res.status(500).json({ error: 'Ошибка ТГ' });
+        }
+    } catch (e) {
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
+app.get('/api/get-result', (req, res) => {
+    const { name1, date1, name2, date2 } = req.query;
+    
+    const num1 = (date1 || '').replace(/-/g, '').split('').reduce((a, b) => a + parseInt(b || 0), 0);
+    const num2 = (date2 || '').replace(/-/g, '').split('').reduce((a, b) => a + parseInt(b || 0), 0);
+    
+    let percent = 100 - Math.abs(num1 - num2) * 3;
+    if (percent > 99) percent = 99;
+    if (percent < 42) percent = 45;
+    
+    let prediction = `Союз ${name1} и ${name2}: Метод 270 указывает на высокую связь (${percent}%).`;
+    res.json({ percent, prediction });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Работает на ${PORT}`));
