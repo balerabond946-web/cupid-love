@@ -4,8 +4,6 @@ meta:
     name: npm
     version: 20
 build:
-  requirements:
-    - package.json
   artifacts:
     - .
 run:
